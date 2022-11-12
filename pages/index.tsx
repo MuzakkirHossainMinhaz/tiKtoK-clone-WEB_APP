@@ -1,19 +1,16 @@
-import { NextPage } from 'next';
-import axios from 'axios';
 import React from 'react';
-import { ImPilcrow } from 'react-icons/im';
-import { GiArchaeopteryxFossil } from 'react-icons/gi';
+import axios from 'axios';
 
-import { Video } from '../types';
 import VideoCard from '../components/VideoCard';
+import { BASE_URL } from '../utils';
+import { Video } from '../types';
 import NoResults from '../components/NoResults';
 
 interface IProps {
-  videos: Video[],
+  videos: Video[];
 }
 
 const Home = ({ videos }: IProps) => {
-  console.log(videos);
   return (
     <div className='flex flex-col gap-10 videos h-full'>
       {videos.length
@@ -22,17 +19,23 @@ const Home = ({ videos }: IProps) => {
         ))
         : <NoResults text={`No Videos`} />}
     </div>
-  )
-}
+  );
+};
 
-export const getServerSideProps = async () => {
-  const { data } = await axios.get(`http://localhost:3000/api/post`);
+export default Home;
+
+export const getServerSideProps = async ({
+  query: { topic },
+}: {
+  query: { topic: string };
+}) => {
+  let response = await axios.get(`${BASE_URL}/api/post`);
+
+  if (topic) {
+    response = await axios.get(`${BASE_URL}/api/discover/${topic}`);
+  }
 
   return {
-    props: {
-      videos: data,
-    }
-  }
-}
-
-export default Home
+    props: { videos: response.data },
+  };
+};
